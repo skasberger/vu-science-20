@@ -1,0 +1,109 @@
+---
+title: "science-20"
+author: "Stefan Kasberger"
+date: "January 16, 2016"
+output: html_document
+---
+
+## Altmetrics of Social Network Analyses publications on ArXiv
+
+```{r}
+```
+
+
+
+```{r}
+library("xlsx")
+library("rAltmetric")
+library("aRxiv")
+
+arxiv_results <- arxiv_search(c("social","network","analysis"), limit = 1000)
+doi_results <- as.vector(arxiv_results[!arxiv_results["link_doi"]=="",][["link_doi"]])
+doi_results <- sapply(strsplit(doi_results, split='http://dx.doi.org/', fixed=TRUE), function(x) (x[2]))
+
+write.table(arxiv_results, file="../data/raw/csv/arxiv_results.csv", sep=",")
+```
+
+
+
+```{r}
+#alt_results <- list()
+#i <- 0
+#graphics.off()
+#for(doi_string in doi_results[0:50]) {
+#  alt_result <- altmetrics(doi = doi_string)
+#  print(class(alt_result))
+#  if(class(alt_result) == "altmetric") {
+#    print(doi_string)
+#    pdf(file = "images/test.pdf", title = doi_string, paper = "a4r", bg = "green") # base.pdf
+#    svg("images/test.svg")
+#    jpeg(file = "images/test.jpg")
+#    plot(altmetrics(doi = doi_string))
+#    dev.off()
+#  }
+#}
+```
+
+
+```{r}
+library(plyr)
+raw_metrics <- lapply(doi_results, function(x) altmetrics(doi = x))
+metric_data <- ldply(raw_metrics, altmetric_data)
+head(metric_data[,c(1:10)])
+write.csv(metric_data, file = "../data/csv/metric_data.csv")
+```
+
+
+
+
+```{r}
+
+alt_results <- c("10.1073/pnas.0611034104", "10.1038/nphys489", "10.1088/1367-2630/9/6/179", "10.1088/1367-2630/10/5/053039", "10.1073/pnas.0706851105", "10.1088/1742-5468/2007/09/P09020", "10.1103/PhysRevE.76.036106", "10.1371/journal.pone.0011233", "10.1073/pnas.0803685105", "10.1016/j.tibs.2008.09.006")
+top10_tweets <- c("10.1371/journal.pone.0061981", "10.1371/journal.pone.0006022", "10.1371/journal.pone.0038869", "10.1371/journal.pone.0071226", "10.1038/srep00902", "10.1371/journal.pcbi.1002199", "10.1073/pnas.1308540110", "10.1140/epjds9", "10.1371/journal.pone.0044620", "10.1126/science.1227970")
+x <- 10
+plot(altmetrics(doi=top10_tweets[x]))
+plot(altmetrics(doi=alt_results[x]))
+alt_results[x]
+#dev.off()
+```
+
+## Twitter Hashtag #altmetrics14
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(plyr)
+library(jsonlite)
+
+twitter_data <- read.csv2("../data/csv/tweets.csv")
+head(count(twitter_data, c("tweeter", "mentioned")))
+
+ggplot(count(twitter_data, c("tweeter", "mentioned")), aes(x=tweeter, y=mentioned)) +
+  geom_tile(aes(fill=log(freq))) +
+  scale_fill_gradient(low="brown", high="yellow") +
+  theme(axis.text = element_text(size=4), axis.text.x = element_text(angle=90)) +
+  xlab("Who mentioned someone") +
+  ylab("Who was mentioned") +
+  labs(title="People who mentioned other people (using the #altmetrics14 hashtag)")
+
+ggsave("../images/altmetrics14_mentions-1.pdf", width = 40, height = 30, units = "cm")
+ggsave("../images/altmetrics14_mentions-1.png", width = 40, height = 30, units = "cm")
+ggsave("../publications/altmetrics14_mentions.png", width = 30, height = 20, units = "cm")
+
+ggplot(subset(count(twitter_data, c("tweeter", "mentioned")), freq > 2), aes(x=tweeter, y=mentioned)) +
+  geom_tile(aes(fill=log(freq))) +
+  scale_fill_gradient(low="brown", high="yellow") +
+  theme(axis.text = element_text(size=8), axis.text.x = element_text(angle=90)) +
+  xlab("Who mentioned someone") +
+  ylab("Who was mentioned") +
+  labs(title="People who mentioned other people more than twice (using the #altmetrics14 hashtag")
+
+ggsave("../images/altmetrics14_mentions-2.pdf", width = 40, height = 30, units = "cm")
+ggsave("../images/altmetrics14_mentions-2.png", width = 40, height = 30, units = "cm")
+ggsave("../publications/altmetrics14_mentions-2.png", width = 30, height = 20, units = "cm")
+```
+
+
+
+
+
+
