@@ -7,6 +7,8 @@
 import json
 import os
 import csv
+import re
+
 
 __author__ = "Stefan Kasberger"
 __copyright__ = "Copyright 2015"
@@ -69,9 +71,16 @@ if __name__ == "__main__":
 		csvfile.readline()
 		mentionreader = csv.reader(csvfile, delimiter=';', quotechar='"')
 		for row in mentionreader:
-			entities_str = json.loads(row[17])
-			for mention in entities_str['user_mentions']:
-				csvString = csvString + row[1] + '; ' + mention['screen_name'] + '\n'
+			pRT = re.compile('^RT @')
+			mRT = pRT.match(row[2])
+			pMT = re.compile('^MT @')
+			mMT = pMT.match(row[2])
+			if mRT or mMT:
+				continue
+			else:
+				entities_str = json.loads(row[17])
+				for mention in entities_str['user_mentions']:
+					csvString = csvString + row[1] + '; ' + mention['screen_name'] + '\n'
 	Save2File(csvString, FILE_TWEETS_OUT)
 
 

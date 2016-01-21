@@ -74,11 +74,17 @@ library(ggplot2)
 library(plyr)
 library(jsonlite)
 
-twitter_data <- read.csv2("../data/csv/tweets.csv")
+twitter_data <- read.csv2("../data/csv/mentions.csv")
 head(count(twitter_data, c("tweeter", "mentioned")))
 
+frequ <- as.vector(count(twitter_data)[,'freq'])
+hist(log10(frequ), breaks=30, xlab="Number of direct mentions [log10]", main="Distribution of re-occuring direct mentions")
+
+dens_data <- density(log10(count(twitter_data, c("tweeter", "mentioned"))[,'freq'])) # returns the density data
+plot(dens_data, xlab="Number of direct mentions [log10]", main="Density of re-occuring direct mentions") # plots the results 
+
 ggplot(count(twitter_data, c("tweeter", "mentioned")), aes(x=tweeter, y=mentioned)) +
-  geom_tile(aes(fill=log(freq))) +
+  geom_tile(aes(fill=log10(freq))) +
   scale_fill_gradient(low="brown", high="yellow") +
   theme(axis.text = element_text(size=4), axis.text.x = element_text(angle=90)) +
   xlab("Who mentioned someone") +
@@ -87,10 +93,10 @@ ggplot(count(twitter_data, c("tweeter", "mentioned")), aes(x=tweeter, y=mentione
 
 ggsave("../images/altmetrics14_mentions-1.pdf", width = 40, height = 30, units = "cm")
 ggsave("../images/altmetrics14_mentions-1.png", width = 40, height = 30, units = "cm")
-ggsave("../publications/altmetrics14_mentions.png", width = 30, height = 20, units = "cm")
+ggsave("../publications/short-paper/altmetrics14_mentions.png", width = 30, height = 20, units = "cm")
 
 ggplot(subset(count(twitter_data, c("tweeter", "mentioned")), freq > 2), aes(x=tweeter, y=mentioned)) +
-  geom_tile(aes(fill=log(freq))) +
+  geom_tile(aes(fill=log10(freq))) +
   scale_fill_gradient(low="brown", high="yellow") +
   theme(axis.text = element_text(size=8), axis.text.x = element_text(angle=90)) +
   xlab("Who mentioned someone") +
@@ -99,7 +105,7 @@ ggplot(subset(count(twitter_data, c("tweeter", "mentioned")), freq > 2), aes(x=t
 
 ggsave("../images/altmetrics14_mentions-2.pdf", width = 40, height = 30, units = "cm")
 ggsave("../images/altmetrics14_mentions-2.png", width = 40, height = 30, units = "cm")
-ggsave("../publications/altmetrics14_mentions-2.png", width = 30, height = 20, units = "cm")
+ggsave("../publications/short-paper/altmetrics14_mentions-2.png", width = 30, height = 20, units = "cm")
 ```
 
 
